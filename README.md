@@ -1,7 +1,9 @@
 # Problem
 Most modern development platforms favor a multi-threaded approach by default. Typically, the split for work is:
+
 - __Main thread__: UI manipulation, event/input routing
 - __Background thread__: All other work
+
 iOS and Android native platforms, for example, restrict (by default) the usage of any APIs not critical to UI manipulation on the main thread.
 
 The web has support for this model via `WebWorkers`, though the `postMessage()` interface is clunky and difficult to use. As a result, worker adoption has been minimal at best and the default model is still all work on the main thread. In order to encourage worker adoption, we need to explore a more ergonomic API.
