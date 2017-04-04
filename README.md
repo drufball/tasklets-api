@@ -89,6 +89,7 @@ dom.appendBox(box);
 # ES language support
 While using this API provides numerous improvements, there are still some rough edges. There is a fair amount of boilerplate to register functions. A site's logic is split between multiple files for main and background work. There's no simple way to just run a function in the background.
 
+## `remote`
 A `remote` keyword could be used to signify a class that was meant to run on the background and replace all of the boilerplate:
 
 ```javascript
@@ -108,6 +109,18 @@ const speaker = new Speaker();
 speaker.concat('Hello');
 ```
 
+`remote` could also be used on individual functions:
+
+```javascript
+remote function concat(text) {
+  console.log(`${text} world!`);
+}
+
+await concat('Hello');
+}
+```
+
+## Accessing DOM apis
 We could replace the need to register main thread APIs by allowing developers to pass a reference to the current context:
 
 ```javascript
@@ -133,6 +146,7 @@ remote class TextAdder {
 }
 ```
 
+## Inline definitions
 If we allowed for inline definitions of remote classes, we get a particularly compact API. Using web components:
 
 ```html
@@ -141,6 +155,7 @@ If we allowed for inline definitions of remote classes, we get a particularly co
   <button onclick="swap">Click me!</button>
 </template>
 <script>
+  // Custom element definition
   class MyElement extends HTMLElement {
     constructor() {
       super();
@@ -164,6 +179,7 @@ If we allowed for inline definitions of remote classes, we get a particularly co
     }
   }
 
+  // Background class
   remote class MyElementTasklet {
     constructor(context) {
       this.dom = context;
@@ -178,7 +194,7 @@ If we allowed for inline definitions of remote classes, we get a particularly co
       }
     }
   }
-
+  // Register the element
   window.customElements.define('my-element', MyElement);
 </script>
 ```
