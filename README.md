@@ -89,8 +89,7 @@ dom.appendBox(box);
 # ES language support
 While using this API provides numerous improvements, there are still some rough edges. There is a fair amount of boilerplate to register functions. A site's logic is split between multiple files for main and background work. There's no simple way to just run a function in the background.
 
-## `remote`
-A `remote` keyword could be used to signify a class that was meant to run on the background and replace all of the boilerplate:
+A `remote` keyword could be used to signify a class that was meant to run in the background, replacing all of the boilerplate (and allowing inline declarations):
 
 ```javascript
 // tasklet.js
@@ -120,84 +119,7 @@ await concat('Hello');
 }
 ```
 
-## Accessing DOM apis
-We could replace the need to register main thread APIs by allowing developers to pass a reference to the current context:
-
-```javascript
-// main.html
-import tasklet.js; // defines TextAdder
-import dom.js; // defines appendText(text) and appendBox(text, style)
-
-const textAdder = new textAdder(document);
-textAdder.doSomething();
-```
-
-```javascript
-// tasklet.js
-remote class TextAdder {
-  constructor(context) {
-    this.dom = context;
-  }
-
-  async doSomething() {
-    await this.dom.appendText('Hello');
-    await this.dom.appendBox(' World!');
-  }
-}
-```
-
-## Inline definitions
-If we allowed for inline definitions of remote classes, we get a particularly compact API. Using web components:
-
-```html
-<template id="my-element">
-  <div id="color">Red</div>
-  <button onclick="swap">Click me!</button>
-</template>
-<script>
-  // Custom element definition
-  class MyElement extends HTMLElement {
-    constructor() {
-      super();
-
-      // Import template markup
-      let markup = document.querySelector('#my-element'); // imagine this works
-      let shadowRoot = this.attachShadow({mode:'open'});
-      shadowRoot.appendChild(markup.content.cloneNode(true));
-
-      // Initialize backgound work
-      this.tasklet = new MyElementTasklet(this);
-    }
-
-    swap() {
-      const currentColor = this.shadowRoot.querySelector('#text').textContent;
-      this.tasklet.updateColor(currentColor);
-    }
-
-    updateUI(newColor) {
-      this.shadowRoot.querySelector('#text').textContent = newColor;
-    }
-  }
-
-  // Background class
-  remote class MyElementTasklet {
-    constructor(context) {
-      this.dom = context;
-    }
-
-    updateColor(currentColor) {
-      if(currentColor == 'Red') {
-        this.dom.updateUI('Blue');
-      }
-      else {
-        this.dom.updateUI('Red');
-      }
-    }
-  }
-  // Register the element
-  window.customElements.define('my-element', MyElement);
-</script>
-```
+For crazier (and less realistic) ideas around language support for exposing main thread APIs, see [ES support for exposing main thread functions](ES-support-main.md).
 
 # A default worker
 When composing functionality (via iframes or just web components), there is some concern that an abundance of workers may lead to memory bloat. Developers will need some way to share worker resources, even in cases where they do not have direct control of the code they are embedding.
